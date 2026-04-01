@@ -1,0 +1,13 @@
+@media (max-width: 768px) {
+  section { padding: 60px 0; }
+
+  .desktop-nav { display: none !important; }
+  .burger { display: flex !important; }
+
+  /* About grid → 1 colonne */
+  #about .container,
+  #contact .container {
+    grid-template-columns: 1fr !important;
+    gap: 40px !important;
+  }
+}
