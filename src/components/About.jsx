@@ -58,6 +58,8 @@ export default function About() {
           }}>
             <div style={{fontSize:32,fontWeight:900,color:'#1a4a35',fontFamily:'Playfair Display,serif'}}>N°1</div>
             <div style={{fontSize:12,color:'#1a4a35',fontWeight:600}}>Port-Gentil</div>
+            <div style={{fontSize:12,color:'#1a4a35',fontWeight:600}}>Oyem</div>
+
           </div>
         </motion.div>
 
@@ -69,10 +71,8 @@ export default function About() {
           <h2 className="section-title">Qui sommes-nous ?</h2>
           <div className="gold-bar"/>
           <p style={{color:'#4b5563',lineHeight:1.8,marginBottom:24,fontSize:16}}>
-            <strong>EGENEM Port-Gentil</strong> est une entreprise gabonaise spécialisée
-            dans l'entretien et le nettoyage des établissements modernes. Nous intervenons
-            dans les secteurs industriels, tertiaires et logistiques avec professionnalisme et rigueur.
-          </p>
+          <strong>EGENEM</strong> est une entreprise gabonaise spécialisée dans l’entretien et le nettoyage des établissements modernes. Présente à <strong>Port-Gentil</strong> et <strong>Oyem</strong>, elle intervient dans les secteurs industriels, tertiaires et logistiques avec professionnalisme et rigueur.
+         </p>
           <p style={{color:'#4b5563',lineHeight:1.8,marginBottom:32,fontSize:16}}>
             Notre mission : garantir des environnements propres, sains et conformes aux exigences
             de nos clients, avec des produits certifiés et des équipements de dernière génération.

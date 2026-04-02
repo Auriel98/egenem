@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { useEffect, useRef } from 'react'
 
 const navLinks = [
   { name: 'Accueil', id: 'hero' },
@@ -29,9 +30,13 @@ const MapPinIcon = () => (
 )
 
 const contacts = [
-  { Icon: PhoneIcon, value: '+241 76 48 51 46' },
+  { Icon: PhoneIcon, value: '+241 76 48 51 46 (Port-Gentil)' },
+  { Icon: PhoneIcon, value: '+241 65 94 46 55 (Port-Gentil)' },
+  { Icon: PhoneIcon, value: '+241 76 48 53 04 (Oyem)' },
+  { Icon: PhoneIcon, value: '+241 65 21 87 54 (Oyem)' },
   { Icon: MailIcon, value: 'contact@egenem.ga' },
   { Icon: MapPinIcon, value: 'Port-Gentil, Gabon' },
+  { Icon: MapPinIcon, value: 'Oyem, Gabon' },
 ]
 
 const chips = [
@@ -40,6 +45,141 @@ const chips = [
   'Espaces Verts',
   'Structures Métalliques',
 ]
+
+// Coordonnées approximatives — à remplacer par les vraies adresses
+const markers = [
+  { lat: -0.7193, lng: 8.7815, label: 'Port-Gentil' },
+  { lat: 1.6359, lng: 11.5833, label: 'Oyem' },
+]
+
+function MapCircle() {
+  const mapRef = useRef(null)
+  const mapInstanceRef = useRef(null)
+
+  useEffect(() => {
+    if (mapInstanceRef.current) return // déjà initialisé
+
+    // Chargement dynamique de Leaflet
+    const link = document.createElement('link')
+    link.rel = 'stylesheet'
+    link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'
+    document.head.appendChild(link)
+
+    const script = document.createElement('script')
+    script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'
+    script.onload = () => {
+      const L = window.L
+
+      const map = L.map(mapRef.current, {
+        center: [0.4, 10.2],
+        zoom: 6,
+        zoomControl: false,
+        scrollWheelZoom: false,
+        attributionControl: false,
+      })
+
+      mapInstanceRef.current = map
+
+      // Tuiles sombres style CartoDB Dark
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap &copy; CARTO',
+        maxZoom: 19,
+      }).addTo(map)
+
+      // Icône personnalisée dorée
+      const goldIcon = L.divIcon({
+        className: '',
+        html: `
+          <div style="
+            width: 14px; height: 14px;
+            background: #c9a227;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 8px rgba(201,162,39,0.8);
+          "></div>
+        `,
+        iconSize: [14, 14],
+        iconAnchor: [7, 7],
+      })
+
+      markers.forEach(({ lat, lng, label }) => {
+        L.marker([lat, lng], { icon: goldIcon })
+          .addTo(map)
+          .bindPopup(`<b style="color:#c9a227">${label}</b>`, {
+            className: 'egenem-popup',
+          })
+      })
+    }
+    document.head.appendChild(script)
+  }, [])
+
+  return (
+    <>
+      <style>{`
+        .map-circle-wrapper {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .map-circle-label {
+          color: #c9a227;
+          font-size: 13px;
+          letter-spacing: 1px;
+          text-transform: uppercase;
+          opacity: 0.85;
+        }
+
+        .map-circle {
+          width: 220px;
+          height: 220px;
+          border-radius: 50%;
+          overflow: hidden;
+          border: 2px solid #1a4a35;
+          box-shadow:
+            0 0 0 4px rgba(201,162,39,0.12),
+            0 0 20px rgba(0,0,0,0.5);
+          position: relative;
+        }
+
+        .map-circle::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          border-radius: 50%;
+          border: 1.5px solid rgba(201,162,39,0.3);
+          pointer-events: none;
+          z-index: 1000;
+        }
+
+        .egenem-popup .leaflet-popup-content-wrapper {
+          background: #0a1f14;
+          color: #fff;
+          border: 1px solid #1a4a35;
+          border-radius: 6px;
+          font-size: 13px;
+        }
+
+        .egenem-popup .leaflet-popup-tip {
+          background: #0a1f14;
+        }
+
+        @media (max-width: 480px) {
+          .map-circle {
+            width: 170px;
+            height: 170px;
+          }
+        }
+      `}</style>
+
+      <div className="map-circle-wrapper">
+        <span className="map-circle-label">Nos agences</span>
+        <div className="map-circle" ref={mapRef} />
+      </div>
+    </>
+  )
+}
 
 export default function Footer() {
   return (
@@ -54,8 +194,9 @@ export default function Footer() {
         .footer-grid {
           padding: 60px 40px;
           display: grid;
-          grid-template-columns: 1.5fr 1fr 1fr;
+          grid-template-columns: 1.5fr 1fr 1fr auto;
           gap: 40px;
+          align-items: start;
         }
 
         .footer-brand h2 {
@@ -119,7 +260,7 @@ export default function Footer() {
         }
 
         /* TABLETTE */
-        @media (max-width: 768px) {
+        @media (max-width: 900px) {
           .footer-grid {
             grid-template-columns: 1fr 1fr;
             padding: 40px 24px;
@@ -128,6 +269,11 @@ export default function Footer() {
           .footer-brand {
             grid-column: 1 / -1;
           }
+
+          .map-circle-wrapper {
+            grid-column: 1 / -1;
+            padding-top: 10px;
+          }
         }
 
         /* MOBILE */
@@ -135,6 +281,10 @@ export default function Footer() {
           .footer-grid {
             grid-template-columns: 1fr;
             padding: 30px 20px;
+          }
+
+          .map-circle-wrapper {
+            grid-column: 1;
           }
         }
       `}</style>
@@ -163,6 +313,15 @@ export default function Footer() {
                 <span>{c.value}</span>
               </div>
             ))}
+          </motion.div>
+
+          {/* CARTE CERCLE */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.85 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6, ease: 'easeOut' }}
+          >
+            <MapCircle />
           </motion.div>
 
         </div>

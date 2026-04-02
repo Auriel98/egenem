@@ -37,8 +37,8 @@ function CircleSlider() {
 
   return (
     <div style={{
-      width: 350,
-      height: 350,
+      width: 300,
+      height: 300,
       borderRadius: '50%',
       overflow: 'hidden',
       position: 'relative',
