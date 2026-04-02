@@ -14,10 +14,21 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
+  // Bloquer le scroll du body quand le menu est ouvert
+  useEffect(() => {
+    document.body.style.overflow = open ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [open])
+
   return (
     <>
-      {/* STYLE INTÉGRÉ */}
       <style>{`
+        /* Empêche le scroll horizontal global */
+        html, body {
+          overflow-x: hidden;
+          max-width: 100%;
+        }
+
         nav {
           position: fixed;
           top: 0;
@@ -51,6 +62,8 @@ export default function Navbar() {
           display: flex;
           gap: 30px;
           list-style: none;
+          margin: 0;
+          padding: 0;
         }
 
         .desktop-nav a {
@@ -72,6 +85,7 @@ export default function Navbar() {
           font-weight: 700;
           font-size: 13px;
           text-decoration: none;
+          white-space: nowrap;
         }
 
         .burger {
@@ -80,41 +94,77 @@ export default function Navbar() {
           border: none;
           color: white;
           cursor: pointer;
+          padding: 4px;
+          z-index: 1100;
         }
 
+        /* OVERLAY sombre derrière le menu */
+        .overlay {
+          display: none;
+          position: fixed;
+          inset: 0;
+          background: rgba(0,0,0,0.5);
+          z-index: 998;
+          opacity: 0;
+          transition: opacity 0.3s ease;
+        }
+
+        .overlay.open {
+          display: block;
+          opacity: 1;
+        }
+
+        /* MENU MOBILE — occupe tout l'écran en largeur */
         .mobile-menu {
           position: fixed;
           top: 0;
-          right: -100%;
-          width: 75%;
-          height: 100vh;
+          right: 0;
+          width: 100%;          /* ← était 75%, cause du scroll horizontal */
+          height: 100dvh;       /* dynamic viewport height pour mobile */
+          max-width: 320px;     /* limite sur grands écrans */
           background: #1a4a35;
           display: flex;
           flex-direction: column;
-          padding: 80px 30px;
-          gap: 25px;
-          transition: right 0.3s ease;
+          padding: 70px 28px 40px;
+          gap: 0;
+          transform: translateX(100%);   /* ← translateX au lieu de right: -100% */
+          transition: transform 0.3s ease;
           z-index: 999;
+          overflow-y: auto;
+          box-sizing: border-box;
         }
 
         .mobile-menu.open {
-          right: 0;
+          transform: translateX(0);
         }
 
         .mobile-menu a {
-          color: white;
+          color: rgba(255,255,255,0.85);
           text-decoration: none;
-          font-size: 18px;
+          font-size: 17px;
+          padding: 16px 0;
+          border-bottom: 1px solid rgba(255,255,255,0.1);
+          display: block;
+          transition: color 0.2s;
+        }
+
+        .mobile-menu a:hover {
+          color: #c9a227;
+        }
+
+        .mobile-menu a:last-of-type {
+          border-bottom: none;
         }
 
         .mobile-cta {
-          margin-top: 20px;
+          margin-top: 28px;
           background: #c9a227;
-          color: #1a4a35;
-          padding: 12px;
+          color: #1a4a35 !important;
+          padding: 14px !important;
           text-align: center;
           border-radius: 4px;
           font-weight: bold;
+          border-bottom: none !important;
         }
 
         /* RESPONSIVE */
@@ -139,7 +189,7 @@ export default function Navbar() {
         backdropFilter: scrolled ? 'blur(10px)' : 'none',
         boxShadow: scrolled ? '0 2px 20px rgba(0,0,0,.25)' : 'none',
       }}>
-        
+
         {/* LOGO */}
         <div className="logo">
           <img src="/logo.png" alt="logo" />
@@ -155,16 +205,22 @@ export default function Navbar() {
           ))}
         </ul>
 
-        {/* CTA */}
+        {/* CTA desktop */}
         <a href="#contact" className="cta">
           Nous contacter
         </a>
 
         {/* BURGER */}
-        <button className="burger" onClick={() => setOpen(!open)}>
+        <button className="burger" onClick={() => setOpen(!open)} aria-label="Menu">
           {open ? <X size={28} /> : <Menu size={28} />}
         </button>
       </nav>
+
+      {/* OVERLAY */}
+      <div
+        className={`overlay ${open ? 'open' : ''}`}
+        onClick={() => setOpen(false)}
+      />
 
       {/* MOBILE MENU */}
       <div className={`mobile-menu ${open ? 'open' : ''}`}>
@@ -173,8 +229,7 @@ export default function Navbar() {
             {l}
           </a>
         ))}
-
-        <a href="#contact" className="mobile-cta">
+        <a href="#contact" className="mobile-cta" onClick={() => setOpen(false)}>
           Nous contacter
         </a>
       </div>
