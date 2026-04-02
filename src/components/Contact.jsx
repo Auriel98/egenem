@@ -1,27 +1,60 @@
 import { motion } from 'framer-motion'
-import { Phone, Mail, MapPin, Send, CheckCircle } from 'lucide-react'
-import { useState } from 'react'
+import { Phone, Mail, MapPin, Send, CheckCircle, AlertCircle } from 'lucide-react'
+import { useState, useRef } from 'react'
+import emailjs from '@emailjs/browser'
+
+// ──────────────────────────────────────────────
+//  🔧 REMPLACE CES 3 VALEURS PAR LES TIENNES
+// ──────────────────────────────────────────────
+const EMAILJS_SERVICE_ID  = 'service_cs5w6z9'  // ex: service_abc123
+const EMAILJS_TEMPLATE_ID = 'template_ln23zjf' // ex: template_xyz789
+const EMAILJS_PUBLIC_KEY  = '0fGB-0o_aoUP_TT9b'  // ex: aBcDeFgHiJkLmNoP
+// ──────────────────────────────────────────────
 
 export default function Contact() {
-  const [form, setForm] = useState({ name: '', email: '', message: '' })
+  const [form, setForm]       = useState({ name: '', email: '', message: '' })
   const [focused, setFocused] = useState(null)
-  const [sent, setSent] = useState(false)
+  const [status, setStatus]   = useState(null) // 'sending' | 'success' | 'error'
+  const formRef = useRef(null)
 
   const handle = e => setForm({ ...form, [e.target.name]: e.target.value })
 
-  const handleSubmit = () => {
-    if (form.name && form.email && form.message) {
-      setSent(true)
-      setTimeout(() => setSent(false), 4000)
+  const handleSubmit = async () => {
+    if (!form.name || !form.email || !form.message) return
+
+    setStatus('sending')  
+
+    try {
+      await emailjs.send(
+        EMAILJS_SERVICE_ID,
+        EMAILJS_TEMPLATE_ID,
+        {
+          from_name:    form.name,
+          from_email:   form.email,
+          message:      form.message,
+          to_name:      'EGENEM',           // apparaît dans le template
+          reply_to:     form.email,
+        },
+        EMAILJS_PUBLIC_KEY
+      )
+
+      setStatus('success')
       setForm({ name: '', email: '', message: '' })
+      setTimeout(() => setStatus(null), 5000)
+    } catch (err) {
+      console.error('EmailJS error:', err)
+      setStatus('error')
+      setTimeout(() => setStatus(null), 5000)
     }
   }
 
   const contacts = [
-    { Icon: Phone, label: 'Telephone', val: ['076 48 51 46', '065 94 46 55'], color: '#c9a227' },
-    { Icon: Mail, label: 'Email', val: ['contact.egenem@gmail.com'], color: '#c9a227' },
-    { Icon: MapPin, label: 'Localisation', val: ['Port-Gentil, Gabon'], color: '#c9a227' },
+    { Icon: Phone,  label: 'Telephone',   val: ['076 48 51 46', '065 94 46 55'],    color: '#c9a227' },
+    { Icon: Mail,   label: 'Email',        val: ['contact.egenem@gmail.com'],         color: '#c9a227' },
+    { Icon: MapPin, label: 'Localisation', val: ['Port-Gentil, Gabon'],               color: '#c9a227' },
   ]
+
+  const isSending = status === 'sending'
 
   return (
     <section
@@ -210,7 +243,7 @@ export default function Contact() {
                 fontFamily: 'Playfair Display,serif',
                 color: '#e8c45a', lineHeight: 1.6,
               }}>
-                "Proprete • Fiabilite • Excellence"
+                "Propreté • Fiabilité • Excellence"
               </div>
             </motion.div>
           </motion.div>
@@ -254,7 +287,7 @@ export default function Contact() {
             </h3>
 
             {/* Succès */}
-            {sent && (
+            {status === 'success' && (
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -268,14 +301,33 @@ export default function Contact() {
                 }}
               >
                 <CheckCircle size={18} color="#2d6e50" />
-                Message envoye avec succes !
+                Message envoyé avec succès !
+              </motion.div>
+            )}
+
+            {/* Erreur */}
+            {status === 'error' && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 10,
+                  background: 'rgba(220,38,38,.07)',
+                  border: '1px solid rgba(220,38,38,.25)',
+                  borderRadius: 8, padding: '14px 18px',
+                  marginBottom: 24, color: '#b91c1c',
+                  fontSize: 14, fontWeight: 600,
+                }}
+              >
+                <AlertCircle size={18} color="#dc2626" />
+                Une erreur est survenue. Réessayez ou contactez-nous directement.
               </motion.div>
             )}
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
               {[
-                { name: 'name', placeholder: 'Votre nom complet', type: 'text' },
-                { name: 'email', placeholder: 'Votre adresse email', type: 'email' },
+                { name: 'name',  placeholder: 'Votre nom complet',      type: 'text'  },
+                { name: 'email', placeholder: 'Votre adresse email',     type: 'email' },
               ].map(({ name, placeholder, type }) => (
                 <motion.div
                   key={name}
@@ -293,18 +345,18 @@ export default function Contact() {
                     onChange={handle}
                     onFocus={() => setFocused(name)}
                     onBlur={() => setFocused(null)}
+                    disabled={isSending}
                     style={{
                       width: '100%', padding: '14px 16px',
                       borderRadius: 8, fontSize: 15,
                       outline: 'none', fontFamily: 'DM Sans,sans-serif',
                       color: '#1c1c1c',
-                      border: focused === name
-                        ? '2px solid #c9a227'
-                        : '1.5px solid #e5e7eb',
+                      border: focused === name ? '2px solid #c9a227' : '1.5px solid #e5e7eb',
                       background: focused === name ? '#fffdf5' : '#fff',
                       transition: 'border-color .2s, background .2s',
                       boxSizing: 'border-box',
                       boxShadow: focused === name ? '0 0 0 4px rgba(201,162,39,.1)' : 'none',
+                      opacity: isSending ? 0.6 : 1,
                     }}
                   />
                 </motion.div>
@@ -318,24 +370,24 @@ export default function Contact() {
               >
                 <textarea
                   name="message"
-                  placeholder="Decrivez votre besoin en detail..."
+                  placeholder="Décrivez votre besoin en détail..."
                   rows={5}
                   value={form.message}
                   onChange={handle}
                   onFocus={() => setFocused('message')}
                   onBlur={() => setFocused(null)}
+                  disabled={isSending}
                   style={{
                     width: '100%', padding: '14px 16px',
                     borderRadius: 8, fontSize: 15,
                     outline: 'none', fontFamily: 'DM Sans,sans-serif',
                     color: '#1c1c1c', resize: 'vertical',
-                    border: focused === 'message'
-                      ? '2px solid #c9a227'
-                      : '1.5px solid #e5e7eb',
+                    border: focused === 'message' ? '2px solid #c9a227' : '1.5px solid #e5e7eb',
                     background: focused === 'message' ? '#fffdf5' : '#fff',
                     transition: 'border-color .2s, background .2s',
                     boxSizing: 'border-box',
                     boxShadow: focused === 'message' ? '0 0 0 4px rgba(201,162,39,.1)' : 'none',
+                    opacity: isSending ? 0.6 : 1,
                   }}
                 />
               </motion.div>
@@ -348,23 +400,40 @@ export default function Contact() {
               >
                 <motion.button
                   onClick={handleSubmit}
-                  whileHover={{ scale: 1.02, boxShadow: '0 14px 40px rgba(26,74,53,.4)' }}
-                  whileTap={{ scale: 0.97 }}
+                  whileHover={!isSending ? { scale: 1.02, boxShadow: '0 14px 40px rgba(26,74,53,.4)' } : {}}
+                  whileTap={!isSending ? { scale: 0.97 } : {}}
+                  disabled={isSending}
                   style={{
                     width: '100%',
-                    background: 'linear-gradient(135deg,#1a4a35,#2d6e50)',
+                    background: isSending
+                      ? 'linear-gradient(135deg,#4a7a65,#5a9075)'
+                      : 'linear-gradient(135deg,#1a4a35,#2d6e50)',
                     color: '#fff', padding: '16px',
                     borderRadius: 8, border: 'none',
                     fontWeight: 700, fontSize: 15,
-                    cursor: 'pointer', letterSpacing: .5,
+                    cursor: isSending ? 'not-allowed' : 'pointer',
+                    letterSpacing: .5,
                     fontFamily: 'DM Sans,sans-serif',
                     boxShadow: '0 8px 28px rgba(26,74,53,.3)',
                     display: 'flex', alignItems: 'center',
                     justifyContent: 'center', gap: 10,
+                    transition: 'background .3s',
                   }}
                 >
-                  <Send size={17} />
-                  Envoyer la demande
+                  {isSending ? (
+                    <>
+                      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
+                        style={{ animation: 'spin 1s linear infinite' }}>
+                        <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                      </svg>
+                      Envoi en cours...
+                    </>
+                  ) : (
+                    <>
+                      <Send size={17} />
+                      Envoyer la demande
+                    </>
+                  )}
                 </motion.button>
               </motion.div>
             </div>
@@ -373,6 +442,7 @@ export default function Contact() {
       </div>
 
       <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
         @media (max-width: 768px) {
           #contact .container > div:last-child {
             grid-template-columns: 1fr !important;
