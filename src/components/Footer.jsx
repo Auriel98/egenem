@@ -34,7 +34,8 @@ const contacts = [
   { Icon: PhoneIcon, value: '+241 65 94 46 55 (Port-Gentil)' },
   { Icon: PhoneIcon, value: '+241 76 48 53 04 (Oyem)' },
   { Icon: PhoneIcon, value: '+241 65 21 87 54 (Oyem)' },
-  { Icon: MailIcon, value: 'contact@egenem.ga' },
+  { Icon: MailIcon, value: 'contact-portgentil@egenem.com' },
+  { Icon: MailIcon, value: 'contact-oyem@egenem.com' },
   { Icon: MapPinIcon, value: 'Port-Gentil, Gabon' },
   { Icon: MapPinIcon, value: 'Oyem, Gabon' },
 ]
